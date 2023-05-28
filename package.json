@@ -1,0 +1,40 @@
+{
+  "name": "twitter-clone-backend",
+  "version": "1.0.0",
+  "description": "This is clone of twitter backend",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saifion33/twitter-clone-backend.git"
+  },
+  "keywords": [
+    "twitter",
+    "backend",
+    "express",
+    "MERN"
+  ],
+  "author": "Azeem Saifi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saifion33/twitter-clone-backend/issues"
+  },
+  "homepage": "https://github.com/saifion33/twitter-clone-backend#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.2.1",
+    "nodemon": "^2.0.22"
+  },
+  "devDependencies": {
+    "eslint": "^8.41.0"
+  }
+}
