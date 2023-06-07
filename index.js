@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import User from './models/user.js'
+import Tweet from './models/tweet.js'
 import cors from 'cors'
 dotenv.config()
 
@@ -31,6 +32,11 @@ app.post('/newUser', async (req, res) => {
         return res.status(200).json({ message: 'User already exists.' })
     }
     User.create(req.body).then(() => res.status(200).json({ message: 'user created successfully.' })).catch(err => { res.send('error creating user' + err) })
+})
+
+app.post('/tweet', async (req, res) => {
+    const { imageUrl, tweet, userId } = req.body;
+    Tweet.create({ imageUrl, tweet, userId }).then(() => res.status(200).json({ message: 'Tweet Posted successfully.' })).catch(err => { res.send('error creating tweet' + err) })
 })
 
 //Connect to the database before listening
