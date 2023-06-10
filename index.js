@@ -26,17 +26,31 @@ const connectDB = async () => {
 
 app.get('/', (req, res) => { res.send('Twitter clone server is working...') })
 
+app.get('/logged-in-user/:email', async (req, res) => {
+    const email = req.params.email;
+    try {
+        const user = await User.findOne({ email })
+        if (user) {
+            return res.status(200).json({ message: 'user found successfully', data: user })
+        }
+        res.status(404).json({ message: 'user not found', data: null })
+
+    } catch (error) {
+        res.status(500).json({ message: 'Somthing goes wrong', data: null })
+    }
+})
 app.post('/newUser', async (req, res) => {
+
     const user = await User.findOne({ email: req.body.email })
     if (user) {
-        return res.status(200).json({ message: 'User already exists.' })
+        return res.status(200).json({ message: 'User already exists.', data: user })
     }
-    User.create(req.body).then(() => res.status(200).json({ message: 'user created successfully.' })).catch(err => { res.send('error creating user' + err) })
+    User.create(req.body).then((response) => res.status(200).json({ message: 'user created successfully.', data: response })).catch(err => { res.send('error creating user' + err) })
 })
 
 app.post('/tweet', async (req, res) => {
     const { imageUrl, tweet, userId } = req.body;
-    Tweet.create({ imageUrl, tweet, userId }).then(() => res.status(200).json({ message: 'Tweet Posted successfully.' })).catch(err => { res.send('error creating tweet' + err) })
+    Tweet.create({ imageUrl, tweet, userId }).then((response) => res.status(200).json({ message: 'Tweet Posted successfully.', data: response })).catch(err => { res.send('error creating tweet' + err) })
 })
 
 //Connect to the database before listening
