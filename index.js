@@ -39,6 +39,19 @@ app.get('/logged-in-user/:email', async (req, res) => {
         res.status(500).json({ message: 'Somthing goes wrong', data: null })
     }
 })
+
+app.get('/allTweets', async (req, res) => {
+    try {
+        const tweets = await Tweet.find()
+        if (tweets) {
+            return res.status(200).json({ message: 'Tweets found', data: tweets })
+        }
+        res.status(404).json({ message: 'tweets not found', data: null })
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', data:null })
+    }
+})
+
 app.post('/newUser', async (req, res) => {
 
     const user = await User.findOne({ email: req.body.email })
