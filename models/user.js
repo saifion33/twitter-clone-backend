@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     name: String,
     email: String,
-    userId: String,
+    userName: String,
+    id: String,
     avatarUrl: String,
-    joinedOn: { type: Date, default: Date.now()}
+    joinedOn: { type: Date, default: Date.now() }
 });
 
 

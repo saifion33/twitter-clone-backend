@@ -49,8 +49,8 @@ app.post('/newUser', async (req, res) => {
 })
 
 app.post('/tweet', async (req, res) => {
-    const { imageUrl, tweet, userId } = req.body;
-    Tweet.create({ imageUrl, tweet, userId }).then((response) => res.status(200).json({ message: 'Tweet Posted successfully.', data: response })).catch(err => { res.send('error creating tweet' + err) })
+    const { imageUrl, tweet, user} = req.body;
+    Tweet.create({ imageUrl, tweet, user}).then((response) => res.status(200).json({ message: 'Tweet Posted successfully.', data: response })).catch(err => { res.send('error creating tweet' + err) })
 })
 
 //Connect to the database before listening
