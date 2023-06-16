@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import User from './models/user.js'
 import Tweet from './models/tweet.js'
+import Replies from './models/reply.js'
 import cors from 'cors'
 dotenv.config()
 
@@ -80,6 +81,28 @@ app.post('/tweet', async (req, res) => {
     const { imageUrl, tweet, user } = req.body;
     Tweet.create({ imageUrl, tweet, user }).then((response) => res.status(200).json({ message: 'Tweet Posted successfully.', data: response })).catch(err => { res.send('error creating tweet' + err) })
 })
+
+app.post('/reply/:tweetId', async (req, res) => {
+    const tweetId = req.params.tweetId
+    const { reply, user, imageUrl } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+        return res.send('Invalid tweet id')
+    }
+    try {
+        const isTweetExist = await Tweet.findById(tweetId)
+        if (!isTweetExist) {
+            return res.status(404).json({ message: "tweet not found", data: null })
+        }
+        const postedReplies = await Replies.findOneAndUpdate({ tweetId }, {
+            $push: { replies: { reply, user, imageUrl } }
+        }, { new: true, upsert: true })
+        const newReply = postedReplies.replies[postedReplies.replies.length - 1]
+        res.status(200).json({ message: 'replied successfully', data: newReply })
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', data: null })
+    }
+})
+
 
 //Connect to the database before listening
 connectDB().then(() => {
