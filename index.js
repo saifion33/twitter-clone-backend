@@ -6,6 +6,7 @@ import User from './models/user.js'
 import Tweet from './models/tweet.js'
 import Replies from './models/reply.js'
 import cors from 'cors'
+
 dotenv.config()
 
 const app = express()
@@ -84,22 +85,36 @@ app.post('/tweet', async (req, res) => {
 
 app.post('/reply/:tweetId', async (req, res) => {
     const tweetId = req.params.tweetId
-    const { reply, user, imageUrl } = req.body;
+    const { replyTweet: tweet, user, imageUrl } = req.body;
     if (!mongoose.Types.ObjectId.isValid(tweetId)) {
-        return res.send('Invalid tweet id')
+        return res.status(404).json({ message: 'Invalid tweet id', data: null })
     }
     try {
-        const isTweetExist = await Tweet.findById(tweetId)
-        if (!isTweetExist) {
-            return res.status(404).json({ message: "tweet not found", data: null })
-        }
         const postedReplies = await Replies.findOneAndUpdate({ tweetId }, {
-            $push: { replies: { reply, user, imageUrl } }
+            $push: { replies: { tweet, user, imageUrl } }
         }, { new: true, upsert: true })
         const newReply = postedReplies.replies[postedReplies.replies.length - 1]
         res.status(200).json({ message: 'replied successfully', data: newReply })
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', data: null })
+    }
+})
+app.get('/getReplies/:tweetId', async (req, res) => {
+    const tweetId = req.params.tweetId
+    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+        return res.status(404).json({ message: 'Invalid tweet id', data: null })
+    }
+    try {
+        const response = await Replies.findOne({ tweetId })
+        console.log('Getting tweet')
+        if (response) {
+            return res.status(200).json({ message: 'Replies get Successfully .', data: response.replies })
+        }
+        res.status(200).json({ message: "Tweet does not have replies", data: [] })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Internal Server Error', data: error })
     }
 })
 
