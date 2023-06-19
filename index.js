@@ -82,6 +82,22 @@ app.post('/tweet', async (req, res) => {
     const { imageUrl, tweet, user } = req.body;
     Tweet.create({ imageUrl, tweet, user }).then((response) => res.status(200).json({ message: 'Tweet Posted successfully.', data: response })).catch(err => { res.send('error creating tweet' + err) })
 })
+app.delete('/deleteTweet/:tweetId', async (req, res) => {
+    const tweetId = req.params.tweetId
+    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+        res.status(400).json({ message: 'Invalid tweet Id.', data: null })
+    }
+    try {
+        const response = await Tweet.findByIdAndDelete(tweetId)
+        if (response) {
+            await Replies.findOneAndDelete({ tweetId })
+            return res.status(200).json({ message: 'Tweet deleted successfully.', data: null })
+        }
+        res.status(404).json({ message: 'Tweet not found.', data: null })
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message })
+    }
+})
 
 app.post('/reply/:tweetId', async (req, res) => {
     const tweetId = req.params.tweetId
@@ -95,6 +111,21 @@ app.post('/reply/:tweetId', async (req, res) => {
         }, { new: true, upsert: true })
         const newReply = postedReplies.replies[postedReplies.replies.length - 1]
         res.status(200).json({ message: 'replied successfully', data: newReply })
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', data: null })
+    }
+})
+app.delete('/deleteReply/:tweetId/:replyId', async (req, res) => {
+    const tweetId = req.params.tweetId;
+    const replyId = req.params.replyId;
+    try {
+        const tweet = await Replies.findOneAndUpdate({ tweetId }, {
+            $pull: { replies: { _id: replyId } }
+        }, { new: true })
+        if (tweet) {
+            return res.status(200).json({ message: 'Tweet find', data: tweet })
+        }
+        res.status(404).json({ message: 'Tweet not found', data: null })
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', data: null })
     }

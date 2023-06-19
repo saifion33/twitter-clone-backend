@@ -8,7 +8,7 @@ const schema = new mongoose.Schema({
         user: { name: String, userName: String, id: String, avatarUrl: String },
         likes: [String],
         views: Number,
-        postedOn: { type: Date, default: Date.now() }
+        postedOn:{type: Date, default: Date.now()}
     }]
 });
 
