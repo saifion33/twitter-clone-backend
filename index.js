@@ -101,16 +101,36 @@ app.delete('/deleteTweet/:tweetId', async (req, res) => {
 
 app.post('/reply/:tweetId', async (req, res) => {
     const tweetId = req.params.tweetId
+    const replyOf = req.query.replyOf
     const { replyTweet: tweet, user, imageUrl } = req.body;
     if (!mongoose.Types.ObjectId.isValid(tweetId)) {
         return res.status(404).json({ message: 'Invalid tweet id', data: null })
     }
     try {
         const postedReplies = await Replies.findOneAndUpdate({ tweetId }, {
-            $push: { replies: { tweet, user, imageUrl } }
+            $push: { replies: { tweet, user, imageUrl, replyOf: tweetId } }
         }, { new: true, upsert: true })
         const newReply = postedReplies.replies[postedReplies.replies.length - 1]
-        res.status(200).json({ message: 'replied successfully', data: newReply })
+        if (replyOf) {
+            const response = await Replies.findOne({ tweetId: replyOf })
+            if (response) {
+                response.replies.map(reply => {
+                    if (reply._id == tweetId) {
+
+                        reply.replyCount += 1;
+                        response.save()
+                        return res.status(200).json({ message: 'Replied successfully', data: newReply })
+                    }
+                })
+                return
+            }
+            return res.status(404).json({ message: 'Tweet to reply not found ', data: null })
+        }
+        await Tweet.findByIdAndUpdate(tweetId, {
+            $inc: { replyCount: 1 }
+        })
+        res.status(200).json({ message: 'Replied successfully', data: newReply })
+
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', data: null })
     }

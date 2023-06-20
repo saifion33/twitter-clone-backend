@@ -8,7 +8,10 @@ const schema = new mongoose.Schema({
         user: { name: String, userName: String, id: String, avatarUrl: String },
         likes: [String],
         views: Number,
-        postedOn:{type: Date, default: Date.now()}
+        replyOf:String,
+        replyCount: { type: Number, default: 0 },
+        postedOn: { type: Date, default: Date.now() }
+
     }]
 });
 
