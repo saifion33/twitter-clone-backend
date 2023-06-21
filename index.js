@@ -135,6 +135,50 @@ app.post('/reply/:tweetId', async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error', data: null })
     }
 })
+app.patch('/like/:tweetId', async (req, res) => {
+
+    const tweetId = req.params.tweetId
+    const replyOf = req.query.replyOf
+    const { userId } = req.body
+    try {
+        if (replyOf) {
+            const response = await Replies.findOne({ tweetId: replyOf })
+            if (response) {
+                response.replies.map(async (reply) => {
+                    if (reply._id == tweetId) {
+                        if (reply.likes.includes(userId)) {
+                            const newlikes = reply.likes.filter(id => id != userId)
+                            reply.likes = newlikes
+                        }
+                        else if (!reply.likes.includes(userId)) {
+                            reply.likes.push(userId)
+                        }
+                        await response.save()
+                        return res.status(200).json(reply)
+                    }
+                })
+                return
+            }
+            return res.status(404).json({ message: 'Tweet not found', data: null })
+        }
+        const response = await Tweet.findById(tweetId)
+        if (response) {
+            if (response.likes.includes(userId)) {
+                const newlikes = response.likes.filter(id => id != userId)
+                response.likes = newlikes
+            }
+            else if (!response.likes.includes(userId)) {
+                response.likes.push(userId)
+            }
+            await response.save()
+            return res.status(200).json(response)
+        }
+        res.status(404).json({ message: 'Tweet not found', data: null })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Internal Server Error', data: null })
+    }
+})
 app.delete('/deleteReply/:tweetId/:replyId', async (req, res) => {
     const tweetId = req.params.tweetId;
     const replyId = req.params.replyId;
