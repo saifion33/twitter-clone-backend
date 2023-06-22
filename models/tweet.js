@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
-
 const schema = new mongoose.Schema({
     tweet: String,
     imageUrl: String,
-    user: { name: String, userName: String, id: String, avatarUrl: String },
+    user: { type: Object },
     likes: [String],
     views: Number,
     replyCount: { type: Number, default: 0 },
