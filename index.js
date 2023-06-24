@@ -2,11 +2,10 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
-import User from './models/user.js'
-import Tweet from './models/tweet.js'
-import Replies from './models/reply.js'
 import cors from 'cors'
-
+import authRoutes from './routes/auth.js'
+import tweetRoutes from './routes/tweet.js'
+import userRoutes from './routes/user.js'
 dotenv.config()
 
 const app = express()
@@ -28,191 +27,15 @@ const connectDB = async () => {
 }
 
 app.get('/', (req, res) => {
+
     res.status(200).json({ message: 'OK' })
 })
 
-app.get('/logged-in-user/:email', async (req, res) => {
-    const email = req.params.email;
-    try {
-        const user = await User.findOne({ email })
-        if (user) {
-            return res.status(200).json({ message: 'user found successfully', data: user })
-        }
-        res.status(404).json({ message: 'user not found', data: null })
+app.use('/auth', authRoutes)
 
-    } catch (error) {
-        res.status(500).json({ message: 'Somthing goes wrong', data: null })
-    }
-})
+app.use('/tweet', tweetRoutes)
 
-app.get('/allTweets', async (req, res) => {
-    try {
-        const tweets = await Tweet.find()
-        if (tweets) {
-            return res.status(200).json({ message: 'Tweets found', data: tweets })
-        }
-        res.status(404).json({ message: 'tweets not found', data: null })
-    } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', data: null })
-    }
-})
-
-app.post('/newUser', async (req, res) => {
-
-    const user = await User.findOne({ email: req.body.email })
-    if (user) {
-        return res.status(200).json({ message: 'User already exists.', data: user })
-    }
-    User.create(req.body).then((response) => res.status(200).json({ message: 'user created successfully.', data: response })).catch(err => { res.send('error creating user' + err) })
-})
-app.patch('/updateUser', async (req, res) => {
-    const { email, update } = req.body;
-    try {
-        const updatedUser = await User.findOneAndUpdate({ email }, update, { new: true })
-        if (updatedUser) {
-            return res.status(200).json({ message: 'User updated successfully', data: updatedUser })
-        }
-
-    } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', data: null })
-    }
-})
-
-app.post('/tweet', async (req, res) => {
-    const { imageUrl, tweet, user } = req.body;
-    Tweet.create({ imageUrl, tweet, user }).then((response) => res.status(200).json({ message: 'Tweet Posted successfully.', data: response })).catch(err => { res.send('error creating tweet' + err) })
-})
-app.delete('/deleteTweet/:tweetId', async (req, res) => {
-    const tweetId = req.params.tweetId
-    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
-        res.status(400).json({ message: 'Invalid tweet Id.', data: null })
-    }
-    try {
-        const response = await Tweet.findByIdAndDelete(tweetId)
-        if (response) {
-            await Replies.findOneAndDelete({ tweetId })
-            return res.status(200).json({ message: 'Tweet deleted successfully.', data: null })
-        }
-        res.status(404).json({ message: 'Tweet not found.', data: null })
-    } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', error: error.message })
-    }
-})
-
-app.post('/reply/:tweetId', async (req, res) => {
-    const tweetId = req.params.tweetId
-    const replyOf = req.query.replyOf
-    const { replyTweet: tweet, user, imageUrl } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
-        return res.status(404).json({ message: 'Invalid tweet id', data: null })
-    }
-    try {
-        const postedReplies = await Replies.findOneAndUpdate({ tweetId }, {
-            $push: { replies: { tweet, user, imageUrl, replyOf: tweetId } }
-        }, { new: true, upsert: true })
-        const newReply = postedReplies.replies[postedReplies.replies.length - 1]
-        if (replyOf) {
-            const response = await Replies.findOne({ tweetId: replyOf })
-            if (response) {
-                response.replies.map(reply => {
-                    if (reply._id == tweetId) {
-
-                        reply.replyCount += 1;
-                        response.save()
-                        return res.status(200).json({ message: 'Replied successfully', data: newReply })
-                    }
-                })
-                return
-            }
-            return res.status(404).json({ message: 'Tweet to reply not found ', data: null })
-        }
-        await Tweet.findByIdAndUpdate(tweetId, {
-            $inc: { replyCount: 1 }
-        })
-        res.status(200).json({ message: 'Replied successfully', data: newReply })
-
-    } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', data: null })
-    }
-})
-app.patch('/like/:tweetId', async (req, res) => {
-
-    const tweetId = req.params.tweetId
-    const replyOf = req.query.replyOf
-    const { userId } = req.body
-    try {
-        if (replyOf) {
-            const response = await Replies.findOne({ tweetId: replyOf })
-            if (response) {
-                response.replies.map(async (reply) => {
-                    if (reply._id == tweetId) {
-                        if (reply.likes.includes(userId)) {
-                            const newlikes = reply.likes.filter(id => id != userId)
-                            reply.likes = newlikes
-                        }
-                        else if (!reply.likes.includes(userId)) {
-                            reply.likes.push(userId)
-                        }
-                        await response.save()
-                        return res.status(200).json(reply)
-                    }
-                })
-                return
-            }
-            return res.status(404).json({ message: 'Tweet not found', data: null })
-        }
-        const response = await Tweet.findById(tweetId)
-        if (response) {
-            if (response.likes.includes(userId)) {
-                const newlikes = response.likes.filter(id => id != userId)
-                response.likes = newlikes
-            }
-            else if (!response.likes.includes(userId)) {
-                response.likes.push(userId)
-            }
-            await response.save()
-            return res.status(200).json(response)
-        }
-        res.status(404).json({ message: 'Tweet not found', data: null })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'Internal Server Error', data: null })
-    }
-})
-app.delete('/deleteReply/:tweetId/:replyId', async (req, res) => {
-    const tweetId = req.params.tweetId;
-    const replyId = req.params.replyId;
-    try {
-        const tweet = await Replies.findOneAndUpdate({ tweetId }, {
-            $pull: { replies: { _id: replyId } }
-        }, { new: true })
-        if (tweet) {
-            return res.status(200).json({ message: 'Tweet find', data: tweet })
-        }
-        res.status(404).json({ message: 'Tweet not found', data: null })
-    } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', data: null })
-    }
-})
-app.get('/getReplies/:tweetId', async (req, res) => {
-    const tweetId = req.params.tweetId
-    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
-        return res.status(404).json({ message: 'Invalid tweet id', data: null })
-    }
-    try {
-        const response = await Replies.findOne({ tweetId })
-        console.log('Getting tweet')
-        if (response) {
-            return res.status(200).json({ message: 'Replies get Successfully .', data: response.replies })
-        }
-        res.status(200).json({ message: "Tweet does not have replies", data: [] })
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({ message: 'Internal Server Error', data: error })
-    }
-})
-
+app.use('/user', userRoutes)
 
 //Connect to the database before listening
 connectDB().then(() => {
