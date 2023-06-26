@@ -5,7 +5,7 @@ import auth from '../middleware/auth.js';
 const router = Router();
 
 // ** 1. get all tweets
-router.get('alltweets', getAllTweets)
+router.get('/alltweets', getAllTweets)
 
 // ** 2. post new tweet
 router.post('/post', auth, postTweet)

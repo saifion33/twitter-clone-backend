@@ -26,6 +26,12 @@ export const updateUser = async (req, res) => {
     const email = req.params.email
     const { update } = req.body;
     try {
+        if (update.userName) {
+            const user = await User.findOne({ userName: update.userName })
+            if (user) {
+                return res.status(409).json({ message: 'User Name already exists', data: null });
+            }
+        }
         const user = await User.findOne({ email });
         if (user.id === req.userId) {
             Object.assign(user, update)
@@ -42,3 +48,4 @@ export const updateUser = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error', data: null })
     }
 }
+
