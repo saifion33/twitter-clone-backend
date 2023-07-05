@@ -113,7 +113,7 @@ export const getTweetReplies = async (req, res) => {
     }
     try {
         const response = await Replies.findOne({ tweetId })
-        console.log('Getting tweet')
+
         if (response) {
             return res.status(200).json({ message: 'Replies get Successfully .', data: response.replies })
         }
@@ -152,10 +152,31 @@ export const deleteReply = async (req, res) => {
             $pull: { replies: { _id: replyId } }
         }, { new: true })
         if (tweet) {
-            return res.status(200).json({ message: 'Tweet find', data: tweet })
+            await Tweet.findByIdAndUpdate(tweetId, {
+                $inc: { replyCount: -1 }
+            })
+            return res.status(200).json({ message: 'Tweet deleted successfully.', data: tweet })
         }
         res.status(404).json({ message: 'Tweet not found', data: null })
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', data: null })
     }
+}
+
+// ** 8. ************************************** GET TWEET BY ID ****************************************************************
+export const getTweetById = async (req, res) => {
+    const tweetId = req.params.tweetId
+    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+        return res.status(401).json({ message: 'Invalid tweet id', data: null })
+    }
+    try {
+        const tweet = await Tweet.findById(tweetId)
+        if (tweet) {
+            return res.status(200).json({ message: 'Get tweet successfully', data: tweet })
+        }
+        res.status(404).json({ message: 'Tweet not Found', data: null })
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', data: null })
+    }
+
 }

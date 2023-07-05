@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { deleteReply, deleteTweet, getAllTweets, getTweetReplies, likeTweet, postTweet, replyTweet } from '../controllers/tweet.js';
+import { deleteReply, deleteTweet, getAllTweets, getTweetById, getTweetReplies, likeTweet, postTweet, replyTweet } from '../controllers/tweet.js';
 import auth from '../middleware/auth.js';
 
 const router = Router();
@@ -24,5 +24,8 @@ router.delete('/delete/:tweetId', auth, deleteTweet)
 
 // ** 7. delete reply
 router.delete('/delete/reply/:tweetId/:replyId', auth, deleteReply)
+
+// ** 8. get tweet by tweetId
+router.get('/getTweet/:tweetId', getTweetById)
 
 export default router;

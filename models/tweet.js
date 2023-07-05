@@ -6,7 +6,7 @@ const schema = new mongoose.Schema({
     likes: [String],
     views: Number,
     replyCount: { type: Number, default: 0 },
-    postedOn: { type: Date, default: Date.now() }
+    postedOn: { type: Date, default: Date}
 });
 
 

@@ -2,14 +2,10 @@ import User from '../models/user.js'
 
 // ** 1. ************************************ GET USER BY EMAIL ************************************
 
-export const getUserByEmail = async (req, res) => {
-    const email = req.params.email;
-    const id = req.userId
+export const getUserById = async (req, res) => {
+    const userId = req.params.userId;
     try {
-        const user = await User.findOne({ email });
-        if (id != user.id) {
-            return res.status(401).json({ message: 'Unauthorized', data: null })
-        }
+        const user = await User.findOne({ id: userId });
         if (!user) {
             return res.status(404).json({ message: 'User not found', data: null })
         }

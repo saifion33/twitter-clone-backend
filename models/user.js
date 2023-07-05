@@ -11,7 +11,7 @@ const schema = new mongoose.Schema({
     bannerUrl: String,
     following: [String],
     followers: [String],
-    joinedOn: { type: Date, default: Date.now() }
+    joinedOn: { type: Date, default: Date }
 });
 
 

@@ -9,7 +9,7 @@ export const signup = async (req, res) => {
     if (user) {
         return res.status(200).json({ message: 'User already exists.', data: { user, token } })
     }
-    User.create(req.body).then((response) => res.status(200).json({ message: 'user created successfully.', data: { response, token } })).catch(err => { res.send('error creating user' + err) })
+    User.create(req.body).then((response) => res.status(200).json({ message: 'user created successfully.', data: { user: response, token } })).catch(err => { res.send('error creating user' + err) })
 }
 
 // ** 2. *********************************** LOGIN ********************************
@@ -26,6 +26,20 @@ export const login = async (req, res) => {
         res.status(404).json({ message: 'user not found', data: null })
     } catch (error) {
         res.status(500).json({ message: 'Somthing goes wrong', data: null })
+    }
+}
+
+export const isUserExist = async (req, res) => {
+    const email = req.params.email;
+    try {
+        const user = await User.findOne({ email });
+        if (user) {
+            return res.status(200).send(true)
+        }
+        res.status(404).send(false);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server Error', data: null });
     }
 }
 
