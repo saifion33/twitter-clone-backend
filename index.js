@@ -10,7 +10,9 @@ dotenv.config()
 
 const app = express()
 const corsOptions = {
-  origin:'*' // Replace with your allowed origin(s
+  origin: 'http://localhost:5000/',
+  methods: 'GET, POST','PATCH','DELETE', // Specify allowed HTTP methods
+  allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
 };
 app.use(cors(corsOptions))
 app.use(express.json())
