@@ -9,12 +9,8 @@ import userRoutes from './routes/user.js'
 dotenv.config()
 
 const app = express()
-const corsOptions = {
-  origin: 'http://localhost:5173/',
-  methods: 'GET, POST','PATCH','DELETE', // Specify allowed HTTP methods
-  allowedHeaders: 'Content-Type, Authorization', // Specify allowed headers
-};
-app.use(cors(corsOptions))
+
+app.use(cors({'*'}))
 app.use(express.json())
 app.use(express.urlencoded())
 const PORT = process.env.PORT || 3000
