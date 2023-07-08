@@ -129,7 +129,7 @@ export const getTweetReplies = async (req, res) => {
 export const deleteTweet = async (req, res) => {
     const tweetId = req.params.tweetId
     if (!mongoose.Types.ObjectId.isValid(tweetId)) {
-        res.status(400).json({ message: 'Invalid tweet Id.', data: null })
+        return res.status(400).json({ message: 'Invalid tweet Id.', data: null })
     }
     try {
         const response = await Tweet.findByIdAndDelete(tweetId)

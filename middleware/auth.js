@@ -2,8 +2,8 @@
 import jwt from 'jsonwebtoken'
 
 const auth = (req, res, next) => {
-
     try {
+
         if (!req.headers.authorization) {
             return res.status(403).json({ status: 403, message: 'provide auth header', data: null });
         }
