@@ -20,17 +20,18 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
     const email = req.params.email
-    const { update } = req.body;
+    const { updates } = req.body;
+    console.log(req.body)
     try {
-        if (update.userName) {
-            const user = await User.findOne({ userName: update.userName })
+        if (updates.userName) {
+            const user = await User.findOne({ userName: updates.userName })
             if (user) {
                 return res.status(409).json({ message: 'User Name already exists', data: null });
             }
         }
         const user = await User.findOne({ email });
         if (user.id === req.userId) {
-            Object.assign(user, update)
+            Object.assign(user, updates)
             await user.save()
             if (user) {
                 return res.status(200).json({ message: 'User updated successfully', data: user })
