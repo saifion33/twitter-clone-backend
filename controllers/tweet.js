@@ -64,7 +64,7 @@ export const replyTweet = async (req, res) => {
 export const likeTweet = async (req, res) => {
     const tweetId = req.params.tweetId
     const replyOf = req.query.replyOf
-    const { userId } = req.body
+    const userId = req.userId;
     try {
         if (replyOf) {
             const response = await Replies.findOne({ tweetId: replyOf })

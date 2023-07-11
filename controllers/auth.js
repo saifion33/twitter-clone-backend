@@ -36,7 +36,7 @@ export const isUserExist = async (req, res) => {
         if (user) {
             return res.status(200).send(true)
         }
-        res.status(404).send(false);
+        res.status(200).send(false);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Internal Server Error', data: null });
