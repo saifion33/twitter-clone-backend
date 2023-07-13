@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 export const signup = async (req, res) => {
     const user = await User.findOne({ email: req.body.email })
     // eslint-disable-next-line no-undef
-    const token = jwt.sign({ email: req.body.email, id: req.body.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+    const token = jwt.sign({ email: req.body.email, id: req.body.id }, process.env.JWT_SECRET, { expiresIn: '1d' })
     if (user) {
         return res.status(200).json({ message: 'User already exists.', data: { user, token } })
     }

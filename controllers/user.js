@@ -21,7 +21,6 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
     const email = req.params.email
     const { updates } = req.body;
-    console.log(req.body)
     try {
         if (updates.userName) {
             const user = await User.findOne({ userName: updates.userName })
